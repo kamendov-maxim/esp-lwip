@@ -325,5 +325,8 @@ void lwip_example_app_platform_assert(const char *msg, int line, const char *fil
 
 /* ESP options */
 #define ESP_LWIP LWIP_NETCONN_FULLDUPLEX
+#define ESP_LWIP_IGMP_TIMERS_ONDEMAND ESP_LWIP
+#define ESP_LWIP_MLD6_TIMERS_ONDEMAND ESP_LWIP
+#define ESP_DNS ESP_LWIP
 
 #endif /* LWIP_LWIPOPTS_H */
