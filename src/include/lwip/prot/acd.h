@@ -50,8 +50,25 @@ extern "C" {
 #define ANNOUNCE_NUM         2   /*         (number of announcement packets)          */
 #define ANNOUNCE_INTERVAL    2   /* seconds (time between announcement packets)       */
 #define ANNOUNCE_WAIT        2   /* seconds (delay before announcing)                 */
-#define MAX_CONFLICTS        10  /*         (max conflicts before rate limiting)      */
-#define RATE_LIMIT_INTERVAL  60  /* seconds (delay between successive attempts)       */
+
+/** LWIP_AUTOIP_MAX_CONFLICTS: Maximum number of conflicts before rate limiting
+ * by default 10 conflicts before rate limiting per RFC-3927
+ */
+#ifdef LWIP_AUTOIP_MAX_CONFLICTS
+#define MAX_CONFLICTS        LWIP_AUTOIP_MAX_CONFLICTS
+#else
+#define MAX_CONFLICTS        10
+#endif
+
+/** LWIP_AUTOIP_RATE_LIMIT_INTERVAL: Delay in seconds between successive attempts
+ * by default 60 seconds between attempts as per RFC-3927
+ */
+#ifdef LWIP_AUTOIP_RATE_LIMIT_INTERVAL
+#define RATE_LIMIT_INTERVAL  LWIP_AUTOIP_RATE_LIMIT_INTERVAL
+#else
+#define RATE_LIMIT_INTERVAL  60
+#endif
+
 #define DEFEND_INTERVAL      10  /* seconds (minimum interval between defensive ARPs) */
 
 /* ACD states */
