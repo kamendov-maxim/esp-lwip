@@ -59,6 +59,7 @@ CORE4FILES=$(LWIPDIR)/core/ipv4/acd.c \
 	$(LWIPDIR)/core/ipv4/igmp.c \
 	$(LWIPDIR)/core/ipv4/ip4_frag.c \
 	$(LWIPDIR)/core/ipv4/ip4.c \
+	$(LWIPDIR)/core/ipv4/ip4_napt.c \
 	$(LWIPDIR)/core/ipv4/ip4_addr.c
 
 CORE6FILES=$(LWIPDIR)/core/ipv6/dhcp6.c \

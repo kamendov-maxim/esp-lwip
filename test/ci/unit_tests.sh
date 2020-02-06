@@ -24,7 +24,7 @@ make -j 4 check
 make clean
 export EXTRA_CFLAGS="-DESP_LWIP=1 -DIP_FORWARD=1 -DIP_NAPT=1" && export CC="${ORIG_CC} ${EXTRA_CFLAGS}"
 make -j 4 check
-# Please uncomment the below to test IP_FORWARD/IP_NAPT tests with debug output (only ip4_route test suite will be executed)
+# test only ip4_route with debug options enabled
 make clean
 export EXTRA_CFLAGS="-DESP_LWIP=1 -DIP_FORWARD=1 -DESP_TEST_DEBUG=1 -DIP_NAPT=1" && export CC="${ORIG_CC} ${EXTRA_CFLAGS}"
 make -j 4 check

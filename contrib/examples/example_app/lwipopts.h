@@ -323,4 +323,7 @@ void lwip_example_app_platform_assert(const char *msg, int line, const char *fil
 #define LWIP_PLATFORM_ASSERT(x) lwip_example_app_platform_assert(x, __LINE__, __FILE__)
 #endif
 
+/* ESP options */
+#define ESP_LWIP LWIP_NETCONN_FULLDUPLEX
+
 #endif /* LWIP_LWIPOPTS_H */

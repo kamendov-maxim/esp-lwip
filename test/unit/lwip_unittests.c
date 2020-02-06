@@ -10,6 +10,7 @@
 #include "core/test_dns.h"
 #include "core/test_mem.h"
 #include "core/test_netif.h"
+#include "core/test_ip4_route.h"
 #include "core/test_pbuf.h"
 #include "core/test_timers.h"
 #include "etharp/test_etharp.h"
@@ -75,6 +76,7 @@ int main(void)
   SRunner *sr;
   size_t i;
   suite_getter_fn* suites[] = {
+#ifndef ESP_TEST_DEBUG
     ip4_suite,
     ip6_suite,
     udp_suite,
@@ -91,10 +93,12 @@ int main(void)
     dhcp_suite,
     mdns_suite,
     mqtt_suite,
-    sockets_suite
+    sockets_suite,
 #if PPP_SUPPORT && PPPOS_SUPPORT
-    , pppos_suite
+    pppos_suite,
 #endif /* PPP_SUPPORT && PPPOS_SUPPORT */
+#endif /* ESP_TEST_DEBUG */
+    ip4route_suite
   };
   size_t num = sizeof(suites)/sizeof(void*);
   LWIP_ASSERT("No suites defined", num > 0);
