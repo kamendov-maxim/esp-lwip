@@ -165,6 +165,7 @@ u32_t esp_random(void);
 #define DNS_FALLBACK_SERVER_INDEX       (DNS_MAX_SERVERS - 1)
 #define ESP_LWIP_DHCP_FINE_TIMERS_ONDEMAND      1
 #define ESP_LWIP_DNS_TIMERS_ONDEMAND            1
+#define ESP_LWIP_IP4_REASSEMBLY_TIMERS_ONDEMAND 1
 
 #else
 #define ESP_LWIP                                0
@@ -179,6 +180,10 @@ u32_t esp_random(void);
 #ifndef ESP_LWIP_DNS_TIMERS_ONDEMAND
 #define ESP_LWIP_DNS_TIMERS_ONDEMAND            0
 #endif
+
+#ifndef ESP_LWIP_IP4_REASSEMBLY_TIMERS_ONDEMAND
+#define ESP_LWIP_IP4_REASSEMBLY_TIMERS_ONDEMAND 0
+#endif /* ESP_LWIP_IP4_REASSEMBLY_TIMERS_ONDEMAND */
 
 #endif /* ESP_LWIP */
 
