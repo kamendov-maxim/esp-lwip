@@ -163,12 +163,17 @@ u32_t esp_random(void);
 #define ESP_LWIP_IGMP_TIMERS_ONDEMAND           1
 #define ESP_LWIP_MLD6_TIMERS_ONDEMAND           1
 #define DNS_FALLBACK_SERVER_INDEX       (DNS_MAX_SERVERS - 1)
+#define ESP_LWIP_DHCP_FINE_TIMERS_ONDEMAND      1
 
 #else
 #define ESP_LWIP                                0
 #define ESP_DNS                                 0
 #define ESP_LWIP_IGMP_TIMERS_ONDEMAND           0
 #define ESP_LWIP_MLD6_TIMERS_ONDEMAND           0
+
+#ifndef ESP_LWIP_DHCP_FINE_TIMERS_ONDEMAND
+#define ESP_LWIP_DHCP_FINE_TIMERS_ONDEMAND      0
+#endif
 
 #endif /* ESP_LWIP */
 
