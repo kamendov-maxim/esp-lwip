@@ -107,7 +107,7 @@
 #define DHCP_DEFINE_CUSTOM_TIMEOUTS     1
 #define DHCP_COARSE_TIMER_SECS          (1)
 #define DHCP_NEXT_TIMEOUT_THRESHOLD     (3)
-#define DHCP_REQUEST_BACKOFF_SEQUENCE(tries)   (( (tries) < 6 ? 1 << (tries) : 60) * 250)
+#define DHCP_REQUEST_BACKOFF_SEQUENCE(state, tries)   ((uint16_t)(((tries) < 5 ? 1 << (tries) : 16) * 250))
 
 #include <stdint.h>
 static inline uint32_t timeout_from_offered(uint32_t lease, uint32_t min)
