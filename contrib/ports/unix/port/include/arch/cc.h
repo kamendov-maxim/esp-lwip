@@ -86,4 +86,8 @@ typedef struct sio_status_s sio_status_t;
 
 typedef unsigned int sys_prot_t;
 
+#ifndef __containerof
+#define __containerof(ptr, type, member) ((type *)(void *)((char *)ptr - offsetof(type, member)))
+#endif
+
 #endif /* LWIP_ARCH_CC_H */
