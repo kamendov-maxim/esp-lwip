@@ -158,9 +158,11 @@ static void tick_lwip(void)
 #endif
   if (tick % 5 == 0) {
 #if ESP_LWIP_DHCP_FINE_TIMERS_ONDEMAND
-    sys_untimeout(dhcp_fine_timeout_cb, NULL);
-#endif
+    sys_untimeout(dhcp_fine_timeout_cb, (void *)&net_test);
+    dhcp_fine_tmr(&net_test);
+#else
     dhcp_fine_tmr();
+#endif
   }
   if (tick % (DHCP_COARSE_TIMER_SECS * 10) == 0) {
     dhcp_coarse_tmr();
