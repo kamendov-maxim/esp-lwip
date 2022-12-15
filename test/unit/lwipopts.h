@@ -152,6 +152,7 @@ void dhcp_free_vendor_class_identifier(void);
 #undef LWIP_RAND
 #define LWIP_RAND() (esp_random())
 u32_t esp_random(void);
+#define IP_NAPT_PORTMAP                 1
 #endif /* IP_NAPT */
 /* ESP debug options */
 #ifdef ESP_TEST_DEBUG
