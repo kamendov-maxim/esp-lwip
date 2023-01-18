@@ -41,6 +41,7 @@
 #define __LWIP_NAPT_H__
 
 #include "lwip/opt.h"
+#include "lwip/netif.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,6 +68,7 @@ extern "C" {
 #define IP_NAPT_PORT_RANGE_START 49152
 #define IP_NAPT_PORT_RANGE_END   61439
 
+
 /**
  * Enable/Disable NAPT for a specified interface.
  *
@@ -85,6 +87,20 @@ ip_napt_enable(u32_t addr, int enable);
  */
 void
 ip_napt_enable_no(u8_t number, int enable);
+
+
+/**
+ * Enable/Disable NAPT for a specified interface.
+ *
+ * @param netif interface handle
+ * @param enable non-zero to enable NAPT, or 0 to disable.
+ *
+ * @return
+ *         - 0: Failure
+ *         - 1: Success
+ */
+int
+ip_napt_enable_netif(struct netif *netif, int enable);
 
 
 /**
