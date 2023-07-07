@@ -43,6 +43,7 @@
 #define SYS_LIGHTWEIGHT_PROT            0
 
 #define LWIP_IPV6                       1
+#define LWIP_ND6                        1
 #define IPV6_FRAG_COPYHEADER            1
 #define LWIP_IPV6_DUP_DETECT_ATTEMPTS   0
 
