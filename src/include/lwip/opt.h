@@ -1153,6 +1153,11 @@
 #define DNS_MAX_NAME_LENGTH             256
 #endif
 
+/** DNS maximum number of ip address stored per host. */
+#if !defined DNS_MAX_HOST_IP || defined __DOXYGEN__
+#define DNS_MAX_HOST_IP                 1
+#endif
+
 /** The maximum of DNS servers
  * The first server can be initialized automatically by defining
  * DNS_SERVER_ADDRESS(ipaddr), where 'ipaddr' is an 'ip_addr_t*'
