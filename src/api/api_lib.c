@@ -126,6 +126,9 @@ netconn_apimsg(tcpip_callback_fn fn, struct api_msg *apimsg)
 
 #if LWIP_NETCONN_SEM_PER_THREAD
   apimsg->op_completed_sem = LWIP_NETCONN_THREAD_SEM_GET();
+  if (!sys_sem_valid(apimsg->op_completed_sem)) {
+    return ERR_MEM;
+  }
 #endif /* LWIP_NETCONN_SEM_PER_THREAD */
 
   err = tcpip_send_msg_wait_sem(fn, apimsg, LWIP_API_MSG_SEM(apimsg));
@@ -1314,6 +1317,9 @@ netconn_gethostbyname(const char *name, ip_addr_t *addr)
 #endif /* LWIP_IPV4 && LWIP_IPV6 */
 #if LWIP_NETCONN_SEM_PER_THREAD
   API_VAR_REF(msg).sem = LWIP_NETCONN_THREAD_SEM_GET();
+  if (!sys_sem_valid(API_VAR_REF(msg).sem)) {
+    return ERR_MEM;
+  }
 #else /* LWIP_NETCONN_SEM_PER_THREAD*/
   err = sys_sem_new(API_EXPR_REF(API_VAR_REF(msg).sem), 0);
   if (err != ERR_OK) {

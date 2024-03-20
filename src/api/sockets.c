@@ -2068,6 +2068,10 @@ lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset,
       API_SELECT_CB_VAR_REF(select_cb).exceptset = exceptset;
 #if LWIP_NETCONN_SEM_PER_THREAD
       API_SELECT_CB_VAR_REF(select_cb).sem = LWIP_NETCONN_THREAD_SEM_GET();
+      if (!sys_sem_valid(API_SELECT_CB_VAR_REF(select_cb).sem)) {
+        set_errno(ENOMEM);
+        return -1;
+      }
 #else /* LWIP_NETCONN_SEM_PER_THREAD */
       if (sys_sem_new(&API_SELECT_CB_VAR_REF(select_cb).sem, 0) != ERR_OK) {
         /* failed to create semaphore */
@@ -2413,6 +2417,11 @@ lwip_poll(struct pollfd *fds, nfds_t nfds, int timeout)
     API_SELECT_CB_VAR_REF(select_cb).poll_nfds = nfds;
 #if LWIP_NETCONN_SEM_PER_THREAD
     API_SELECT_CB_VAR_REF(select_cb).sem = LWIP_NETCONN_THREAD_SEM_GET();
+    if (!sys_sem_valid(API_SELECT_CB_VAR_REF(select_cb).sem)) {
+      set_errno(ENOMEM);
+      return -1;
+    }
+
 #else /* LWIP_NETCONN_SEM_PER_THREAD */
     if (sys_sem_new(&API_SELECT_CB_VAR_REF(select_cb).sem, 0) != ERR_OK) {
       /* failed to create semaphore */
