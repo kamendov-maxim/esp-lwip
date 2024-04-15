@@ -983,7 +983,7 @@ lwip_netconn_do_close_internal(struct netconn *conn  WRITE_DELAYED_PARAM)
     err = ERR_OK;
     /* linger enabled/required at all? (i.e. is there untransmitted data left?) */
     if ((conn->linger >= 0) && (conn->pcb.tcp->unsent || conn->pcb.tcp->unacked)) {
-      if ((conn->linger == 0)) {
+      if (conn->linger == 0) {
         /* data left but linger prevents waiting */
         tcp_abort(tpcb);
         tpcb = NULL;

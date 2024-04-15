@@ -76,6 +76,8 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     list(APPEND LWIP_COMPILER_FLAGS_GNU_CLANG
         -Wlogical-op
         -Wtrampolines
+        -fno-stack-clash-protection
+        -Wno-error=format-extra-args
     )
 
     if (NOT LWIP_HAVE_MBEDTLS)

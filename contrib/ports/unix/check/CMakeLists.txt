@@ -16,7 +16,7 @@ include(${LWIP_DIR}/contrib/ports/CMakeCommon.cmake)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
     # check.h causes 'error: token pasting of ',' and __VA_ARGS__ is a GNU extension' with clang 9.0.0
-    list(LWIP_COMPILER_FLAGS APPEND -Wno-gnu-zero-variadic-macro-arguments)
+    list(APPEND LWIP_COMPILER_FLAGS -Wno-gnu-zero-variadic-macro-arguments)
 endif()
 
 set (LWIP_DEFINITIONS -DLWIP_DEBUG -DLWIP_NOASSERT_ON_ERROR)

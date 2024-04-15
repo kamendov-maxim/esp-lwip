@@ -45,7 +45,6 @@
  *    leaking messages.
  */
 #define _GNU_SOURCE /* pull in pthread_setname_np() on Linux */
-
 #include "lwip/debug.h"
 
 #include <string.h>
