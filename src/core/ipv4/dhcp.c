@@ -1439,6 +1439,7 @@ static void
 dhcp_set_state(struct dhcp *dhcp, u8_t new_state)
 {
   if (new_state != dhcp->state) {
+    LWIP_DEBUGF(DHCP_DEBUG | LWIP_DBG_STATE, ("dhcp_set_state(): old state: /0x%" X8_F " -> new state: /0x%" X8_F "\n", dhcp->state, new_state));
     dhcp->state = new_state;
     dhcp->tries = 0;
     dhcp->request_timeout = 0;
