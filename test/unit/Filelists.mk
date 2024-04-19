@@ -53,4 +53,3 @@ TESTFILES=$(TESTDIR)/lwip_unittests.c \
 	$(TESTDIR)/udp/test_udp.c \
 	$(TESTDIR)/ppp/test_pppos.c \
 	$(TESTDIR)/esp_platform_hooks.c
-

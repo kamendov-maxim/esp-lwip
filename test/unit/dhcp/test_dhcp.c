@@ -134,6 +134,7 @@ static const u8_t arpreply[] = {
 };
 
 static int txpacket;
+static int tx_arp;
 static enum tcase {
   TEST_LWIP_DHCP,
   TEST_LWIP_DHCP_NAK,
@@ -157,7 +158,7 @@ static void tick_lwip(void)
   if (tick % 5 == 0) {
     dhcp_fine_tmr();
   }
-  if (tick % 600 == 0) {
+  if (tick % (DHCP_COARSE_TIMER_SECS * 10) == 0) {
     dhcp_coarse_tmr();
   }
 }
@@ -492,40 +493,37 @@ static err_t lwip_tx_func(struct netif *netif, struct pbuf *p)
     }
     break;
   case TEST_LWIP_DHCP_OPTS:
-    switch (txpacket) {
-      case 1:
-      case 2:
-      case 7:
-      {
-        u8_t requested_opts[16];
-        u8_t len = get_opt(DHCP_OPTION_MESSAGE_TYPE, p, requested_opts, sizeof(requested_opts));
-        fail_unless(len > 0);
-        last_message_type = requested_opts[0];
-        len = get_opt(DHCP_OPTION_PARAMETER_REQUEST_LIST, p, requested_opts, sizeof(requested_opts));
+    if (p->tot_len <= sizeof(arpreply) && memcmp(p->payload, broadcast, sizeof(broadcast)) == 0) {
+      /* skip ARP packets, but count them to check number DHCP packets transmitted */
+      tx_arp++;
+      break;
+    }
+    {
+      u8_t requested_opts[16];
+      u8_t len = get_opt(DHCP_OPTION_MESSAGE_TYPE, p, requested_opts, sizeof(requested_opts));
+      fail_unless(len > 0);
+      last_message_type = requested_opts[0];
+      len = get_opt(DHCP_OPTION_PARAMETER_REQUEST_LIST, p, requested_opts, sizeof(requested_opts));
 #if ESP_LWIP
 #if LWIP_DHCP_ENABLE_VENDOR_SPEC_IDS
-        /* Check the opt 43 is amond the requested items */
-        fail_unless(len > 0 && memchr(requested_opts, 43, len) != NULL);
-        /* Test the vendor class ID option is available */
-        len = get_opt(60, p, requested_opts, sizeof(requested_opts));
-        fail_unless(len > 0 && memcmp(requested_opts, vci_string, sizeof(vci_string)) == 0);
+      /* Check the opt 43 is amond the requested items */
+      fail_unless(len > 0 && memchr(requested_opts, 43, len) != NULL);
+      /* Test the vendor class ID option is available */
+      len = get_opt(60, p, requested_opts, sizeof(requested_opts));
+      fail_unless(len > 0 && memcmp(requested_opts, vci_string, sizeof(vci_string)) == 0);
 #else  /* !LWIP_DHCP_ENABLE_VENDOR_SPEC_IDS */
-        fail_unless(memchr(requested_opts, 43, len) == NULL); /* VSI mustn't be in the reqested opts */
+      fail_unless(memchr(requested_opts, 43, len) == NULL); /* VSI mustn't be in the reqested opts */
 #endif /* LWIP_DHCP_ENABLE_VENDOR_SPEC_IDS */
 #if LWIP_DHCP_ENABLE_CLIENT_ID
-        /* Test the client ID option is available */
-        len = get_opt(DHCP_OPTION_CLIENT_ID, p, requested_opts, sizeof(requested_opts));
-        fail_unless(len > 0 && requested_opts[0] == LWIP_IANA_HWTYPE_ETHERNET &&
-                    memcmp(requested_opts + 1, netif->hwaddr, len - 1) == 0);
+      /* Test the client ID option is available */
+      len = get_opt(DHCP_OPTION_CLIENT_ID, p, requested_opts, sizeof(requested_opts));
+      fail_unless(len > 0 && requested_opts[0] == LWIP_IANA_HWTYPE_ETHERNET &&
+                  memcmp(requested_opts + 1, netif->hwaddr, len - 1) == 0);
 #endif /* LWIP_DHCP_ENABLE_CLIENT_ID */
 #else /* ! ESP_LWIP */
-        /* vanilla lwip: at least subnet mask should be in the requested opt list */
-        fail_unless(len > 0 && memchr(requested_opts, DHCP_OPTION_SUBNET_MASK, len) != NULL);
+      /* vanilla lwip: at least subnet mask should be in the requested opt list */
+      fail_unless(len > 0 && memchr(requested_opts, DHCP_OPTION_SUBNET_MASK, len) != NULL);
 #endif /* ESP_LWIP */
-      }
-      break;
-      default:
-        break;
     }
     break;
 
@@ -1173,6 +1171,7 @@ START_TEST(test_options)
 
   tcase = TEST_LWIP_DHCP_OPTS;
   setdebug(0);
+  tx_arp = 0;
 
   IP4_ADDR(&addr, 0, 0, 0, 0);
   IP4_ADDR(&netmask, 0, 0, 0, 0);
@@ -1242,14 +1241,16 @@ START_TEST(test_options)
 
   last_message_type = 0;
   /* wait after the rebinding period to expect:
-   * 4 ARP packets (pkt 3, 4, 5, 6)
+   * several ARP packets
+   *   we count them, as in ESP_LWIP we redefine dhcp ticks and backoff timeouts,
+   *   so that we don't have to update this test every time we update the hooks/period
    * 1 DHCP request packet with renewal */
   for (i = 0; i < 1200; i++) {
     tick_lwip();
     if (last_message_type == DHCP_REQUEST)
       break;
   }
-  fail_unless(txpacket == 7, "TX %d packets, expected 7", txpacket);  /* DHCP renewal */
+  fail_unless(txpacket == 3 + tx_arp, "TX %d packets, expected %d", txpacket, 3 + DHCP_TEST_NUM_ARP_FRAMES);  /* DHCP renewal */
 
 #if ESP_LWIP && LWIP_DHCP_ENABLE_VENDOR_SPEC_IDS
   dhcp_free_vendor_class_identifier();

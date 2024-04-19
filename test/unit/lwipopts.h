@@ -98,7 +98,7 @@
 #define LWIP_DHCP_ENABLE_MTU_UPDATE 1
 #if LWIP_DHCP_ENABLE_VENDOR_SPEC_IDS
 #define DHCP_OPTION_VSI             43
-#define LWIP_HOOK_DHCP_EXTRA_REQUEST_OPTIONS , DHCP_OPTION_VSI
+#define DHCP_ADD_EXTRA_REQUEST_OPTIONS , DHCP_OPTION_VSI
 #endif
 #define ESP_LWIP                        1
 
@@ -106,7 +106,7 @@
 #define DHCP_DEFINE_CUSTOM_TIMEOUTS     1
 #define DHCP_COARSE_TIMER_SECS          (1)
 #define DHCP_NEXT_TIMEOUT_THRESHOLD     (3)
-#define DHCP_REQUEST_TIMEOUT_SEQUENCE(tries)   (( (tries) < 6 ? 1 << (tries) : 60) * 250)
+#define DHCP_REQUEST_BACKOFF_SEQUENCE(tries)   (( (tries) < 6 ? 1 << (tries) : 60) * 250)
 
 #include <stdint.h>
 static inline uint32_t timeout_from_offered(uint32_t lease, uint32_t min)
@@ -117,12 +117,12 @@ static inline uint32_t timeout_from_offered(uint32_t lease, uint32_t min)
     }
     return timeout;
 }
-#define DHCP_CALC_TIMEOUT_FROM_OFFERED_T0_LEASE(dhcp)  \
-        timeout_from_offered((dhcp)->offered_t0_lease, 120)
-#define DHCP_CALC_TIMEOUT_FROM_OFFERED_T1_RENEW(dhcp)  \
-        timeout_from_offered((dhcp)->offered_t1_renew, (dhcp)->t0_timeout>>1 /* 50% */ )
-#define DHCP_CALC_TIMEOUT_FROM_OFFERED_T2_REBIND(dhcp) \
-        timeout_from_offered((dhcp)->offered_t2_rebind, ((dhcp)->t0_timeout/8)*7 /* 87.5% */ )
+#define DHCP_SET_TIMEOUT_FROM_OFFERED_T0_LEASE(tout, dhcp)  do {    \
+        (tout) = timeout_from_offered((dhcp)->offered_t0_lease, 120); } while(0)
+#define DHCP_SET_TIMEOUT_FROM_OFFERED_T1_RENEW(tout, dhcp)  do {    \
+        (tout) = timeout_from_offered((dhcp)->offered_t1_renew, (dhcp)->t0_timeout>>1 /* 50% */ );  } while(0)
+#define DHCP_SET_TIMEOUT_FROM_OFFERED_T2_REBIND(tout, dhcp) do {    \
+        (tout) = timeout_from_offered((dhcp)->offered_t2_rebind, ((dhcp)->t0_timeout/8)*7 /* 87.5% */ );  } while(0)
 
 struct dhcp;
 struct pbuf;
