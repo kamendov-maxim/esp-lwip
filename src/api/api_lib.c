@@ -1278,9 +1278,9 @@ netconn_gethostbyname(const char *name, ip_addr_t *addr)
 #endif
 {
   API_VAR_DECLARE(struct dns_api_msg, msg);
-#if !LWIP_MPU_COMPATIBLE
+#if !LWIP_MPU_COMPATIBLE && !LWIP_NETCONN_SEM_PER_THREAD
   sys_sem_t sem;
-#endif /* LWIP_MPU_COMPATIBLE */
+#endif /* !LWIP_MPU_COMPATIBLE && !LWIP_NETCONN_SEM_PER_THREAD */
   err_t err;
   err_t cberr;
 
@@ -1308,7 +1308,9 @@ netconn_gethostbyname(const char *name, ip_addr_t *addr)
   API_VAR_REF(msg).name[DNS_MAX_NAME_LENGTH - 1] = 0;
 #else /* LWIP_MPU_COMPATIBLE */
   msg.err = &err;
+#if !LWIP_NETCONN_SEM_PER_THREAD
   msg.sem = &sem;
+#endif
   API_VAR_REF(msg).addr = API_VAR_REF(addr);
   API_VAR_REF(msg).name = name;
 #endif /* LWIP_MPU_COMPATIBLE */
