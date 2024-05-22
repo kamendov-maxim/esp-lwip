@@ -101,6 +101,10 @@
 static bool s_is_tmr_start = false;
 #endif /* ESP_LWIP_DNS_TIMERS_ONDEMAND */
 
+#if LWIP_DNS_SETSERVER_WITH_NETIF
+static dns_setserver_callback_t s_dns_setserver_callback = NULL;
+#endif /* LWIP_DNS_SETSERVER_WITH_NETIF */
+
 #include <string.h>
 #if ESP_DNS
 #include <stdbool.h>
@@ -1768,5 +1772,28 @@ dns_gethostbyname_addrtype(const char *hostname, ip_addr_t *addr, dns_found_call
   return dns_enqueue(hostname, hostnamelen, found, callback_arg LWIP_DNS_ADDRTYPE_ARG(dns_addrtype)
                      LWIP_DNS_ISMDNS_ARG(is_mdns));
 }
+
+#if LWIP_DNS_SETSERVER_WITH_NETIF
+void
+dns_setserver_with_netif(struct netif* netif, u8_t numdns, const ip_addr_t *dnsserver)
+{
+  if (s_dns_setserver_callback) {
+    s_dns_setserver_callback(netif, numdns, dnsserver);
+  } else {
+    dns_setserver(numdns, dnsserver);
+  }
+}
+
+err_t
+dns_setserver_callback(dns_setserver_callback_t callback)
+{
+  if (s_dns_setserver_callback) {
+    /* fail if the callback has been set already */
+    return ERR_ARG;
+  }
+  s_dns_setserver_callback = callback;  /* support only one time configuration */
+  return ERR_OK;
+}
+#endif /* LWIP_DNS_SETSERVER_WITH_NETIF */
 
 #endif /* LWIP_DNS */

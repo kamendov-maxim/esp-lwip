@@ -780,14 +780,23 @@ nd6_input(struct pbuf *p, struct netif *inp)
 
             if (htonl(rdnss_opt->lifetime) > 0) {
               /* TODO implement Lifetime > 0 */
+#if LWIP_DNS_SETSERVER_WITH_NETIF
+              dns_setserver_with_netif(inp, rdnss_server_idx++, &rdnss_address);
+#else
               dns_setserver(rdnss_server_idx++, &rdnss_address);
+#endif
+
             } else {
               /* TODO implement DNS removal in dns.c */
               u8_t s;
               for (s = 0; s < DNS_MAX_SERVERS; s++) {
                 const ip_addr_t *addr = dns_getserver(s);
                 if(ip_addr_cmp(addr, &rdnss_address)) {
+#if LWIP_DNS_SETSERVER_WITH_NETIF
+                  dns_setserver_with_netif(inp, s, NULL);
+#else
                   dns_setserver(s, NULL);
+#endif
                 }
               }
             }
