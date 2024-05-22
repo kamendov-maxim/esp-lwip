@@ -1203,6 +1203,20 @@
 #define DNS_LOCAL_HOSTLIST              0
 #endif /* DNS_LOCAL_HOSTLIST */
 
+/** LWIP_DNS_SETSERVER_WITH_NETIF: If this is turned on, the dns_setserver_with_netif() is enabled and called
+ * from all internal modules (instead of dns_setserver()) allowing to setup a user callback to collect DNS server
+ * information acquired by the related network interface.
+ * This could be used to overcome the LWIP limitation of using DNS servers
+ * globally, which could in some cases overwrite distinct DNS server information of one netif by another.
+ * If you want to use this option, you would have to set LWIP_DNS_SETSERVER_WITH_NETIF=1 and:
+ * 1) Register DNS setserver callback using dns_setserver_callback() and collect the DNS server information
+ * in the callback and store it separately for each netif.
+ * 2) Restore the actual DNS server information using dns_setserver() before every DNS lookup.
+ * */
+#if !defined LWIP_DNS_SETSERVER_WITH_NETIF || defined __DOXYGEN__
+#define LWIP_DNS_SETSERVER_WITH_NETIF   0
+#endif /* LWIP_DNS_SETSERVER_WITH_NETIF */
+
 /** If this is turned on, the local host-list can be dynamically changed
  *  at runtime. */
 #if !defined DNS_LOCAL_HOSTLIST_IS_DYNAMIC || defined __DOXYGEN__
