@@ -169,6 +169,7 @@ u32_t esp_random(void);
 #define ESP_LWIP_DNS_TIMERS_ONDEMAND            1
 #define ESP_LWIP_IP4_REASSEMBLY_TIMERS_ONDEMAND 1
 #define ESP_LWIP_IP6_REASSEMBLY_TIMERS_ONDEMAND 1
+#define DHCP_DOES_ARP_CHECK                     1
 
 #else
 #define ESP_LWIP                                0
@@ -182,6 +183,10 @@ u32_t esp_random(void);
 
 #ifndef ESP_LWIP_DNS_TIMERS_ONDEMAND
 #define ESP_LWIP_DNS_TIMERS_ONDEMAND            0
+#endif
+
+#ifndef DHCP_DOES_ARP_CHECK
+#define DHCP_DOES_ARP_CHECK                     0
 #endif
 
 #ifndef ESP_LWIP_IP4_REASSEMBLY_TIMERS_ONDEMAND
