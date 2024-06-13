@@ -74,6 +74,17 @@ int h_errno;
 #define HOSTENT_STORAGE static
 #endif /* LWIP_DNS_API_STATIC_HOSTENT */
 
+/* Counts IP addresses in addr array until a zero IP address is encountered */
+#define COUNT_NON_ZERO_IP_ADDRESSES(addr, ipaddr_cnt) \
+  do { \
+    ipaddr_cnt = 0; \
+    for (i = 0; i < DNS_MAX_HOST_IP; i++) { \
+      if (!ip_addr_cmp(&addr_zero, &addr[i])) { \
+        ipaddr_cnt++; \
+      } \
+    } \
+  } while(0)
+
 /**
  * Returns an entry containing addresses of address family AF_INET
  * for the host with name name.
@@ -89,6 +100,7 @@ lwip_gethostbyname(const char *name)
   u8_t i;
   err_t err;
   ip_addr_t addr[DNS_MAX_HOST_IP]={0}, addr_zero={0};
+  u8_t ipaddr_cnt = 0;
 
   /* buffer variables for lwip_gethostbyname() */
   HOSTENT_STORAGE struct hostent s_hostent;
@@ -105,16 +117,24 @@ lwip_gethostbyname(const char *name)
     return NULL;
   }
 
-  /* fill hostent */
-  for (i=0; i<DNS_MAX_HOST_IP; i++){
-    if (!ip_addr_cmp(&addr_zero, &addr[i])) {
-      s_hostent_addr[i] = addr[i];
-      s_phostent_addr[i] = &s_hostent_addr[i];
-    } else {
-      break;
+  COUNT_NON_ZERO_IP_ADDRESSES(addr, ipaddr_cnt);
+
+  if (ipaddr_cnt == 0) {
+    /* handle 0.0.0.0 */
+    s_hostent_addr[0] = addr[0];
+    s_phostent_addr[0] = &s_hostent_addr[0];
+    s_phostent_addr[1] = NULL;
+  } else {
+    for (i=0; i<ipaddr_cnt; i++){
+      if (!ip_addr_cmp(&addr_zero, &addr[i])) {
+        s_hostent_addr[i] = addr[i];
+        s_phostent_addr[i] = &s_hostent_addr[i];
+      } else {
+        break;
+      }
     }
+    s_phostent_addr[i] = NULL;
   }
-  s_phostent_addr[i] = NULL;
   strncpy(s_hostname, name, DNS_MAX_NAME_LENGTH);
   s_hostname[DNS_MAX_NAME_LENGTH] = 0;
   s_hostent.h_name = s_hostname;
@@ -175,6 +195,7 @@ lwip_gethostbyname_r(const char *name, struct hostent *ret, char *buf,
   size_t namelen;
   ip_addr_t addr_zero={0};
   int lh_errno;
+  u8_t ipaddr_cnt = 0;
 
   if (h_errnop == NULL) {
     /* ensure h_errnop is never NULL */
@@ -217,15 +238,23 @@ lwip_gethostbyname_r(const char *name, struct hostent *ret, char *buf,
   MEMCPY(hostname, name, namelen);
   hostname[namelen] = 0;
 
-  /* fill hostent */
-  for (i=0; i<DNS_MAX_HOST_IP; i++){
-    if (!ip_addr_cmp(&addr_zero, &h->addr[i])) {
-      h->addr_list[i] = &h->addr[i];
-    } else {
-      break;
+  COUNT_NON_ZERO_IP_ADDRESSES(h->addr, ipaddr_cnt);
+
+  if (ipaddr_cnt == 0) {
+    /* handle 0.0.0.0 */
+    h->addr_list[0] = &h->addr[0];
+    h->addr_list[1] = NULL;
+  } else {
+    for (i=0; i<ipaddr_cnt; i++) {
+      if (!ip_addr_cmp(&addr_zero, &h->addr[i])) {
+        h->addr_list[i] = &h->addr[i];
+      } else {
+        break;
+      }
     }
+    h->addr_list[i] = NULL;
   }
-  h->addr_list[i] = NULL;
+
   h->aliases = NULL;
   ret->h_name = hostname;
   ret->h_aliases = &h->aliases;
@@ -386,6 +415,7 @@ lwip_getaddrinfo(const char *nodename, const char *servname,
 {
   err_t err;
   ip_addr_t addr[DNS_MAX_HOST_IP]={0}, addr_zero={0};
+  u8_t ipaddr_cnt = 0;
   struct addrinfo *ai=NULL, *ai_head=NULL, *ai_tail=NULL;
   int port_nr = 0;
   int ai_family;
@@ -471,33 +501,40 @@ lwip_getaddrinfo(const char *nodename, const char *servname,
     }
   }
 
-  for (i=0; i<DNS_MAX_HOST_IP; i++) {
-    if (!ip_addr_cmp(&addr_zero, &addr[i])) {
-      ret = create_addrinfo(addr[i], nodename, hints, port_nr, &ai, i);
-      if (ret != ERR_OK) {  /* failure: free the entire list */
-        while (ai_head) {
-          ai = ai_head->ai_next;
-          memp_free(MEMP_NETDB, ai_head);
-          ai_head = ai;
-        }
-        *res = NULL;
-        return ret;
-      }
+  COUNT_NON_ZERO_IP_ADDRESSES(addr, ipaddr_cnt);
 
-      if (ai != NULL) {
-        if (ai_head == NULL) {
-          /* Initialize head */
-          ai_head = ai;
-          ai_tail = ai_head;
-        } else {
-          ai_tail->ai_next = ai;
-          ai_tail = ai;
+  if (ipaddr_cnt == 0) {
+    /* handle 0.0.0.0 */
+    ret = create_addrinfo(addr[0], nodename, hints, port_nr, &ai, 0);
+    if (ret != ERR_OK) {
+      *res = NULL;
+      return ret;
+    }
+    *res = ai;
+  } else {
+    for (i=0; i<ipaddr_cnt; i++) {
+      if (!ip_addr_cmp(&addr_zero, &addr[i])) {
+        ret = create_addrinfo(addr[i], nodename, hints, port_nr, &ai, i);
+        if (ret != ERR_OK) {  /* failure: free the entire list */
+          lwip_freeaddrinfo(ai_head);
+          *res = NULL;
+          return ret;
         }
-        ai_tail->ai_next = NULL;
+
+        if (ai != NULL) {
+          if (ai_head == NULL) {
+            /* Initialize head */
+            ai_head = ai;
+          } else {
+            ai_tail->ai_next = ai;
+          }
+          ai_tail = ai;
+          ai_tail->ai_next = NULL;
+        }
       }
     }
+    *res = ai_head;
   }
-  *res = ai_head;
 
   return 0;
 }

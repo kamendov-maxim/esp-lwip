@@ -1118,7 +1118,7 @@ dns_backupserver_available(struct dns_table_entry *pentry)
  * - retry old pending entries on timeout (also with different servers)
  * - remove completed entries from the table if their TTL has expired
  *
- * @param i index of the dns_table entry to check
+ * @param idx index of the dns_table entry to check
  */
 static void
 dns_check_entry(u8_t idx)
