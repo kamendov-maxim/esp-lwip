@@ -1109,7 +1109,6 @@ dhcp_discover(struct netif *netif)
   ip4_addr_set_any(&dhcp->offered_ip_addr);
   dhcp_set_state(dhcp, DHCP_STATE_SELECTING);
   LWIP_DEBUGF(DHCP_DEBUG | LWIP_DBG_STATE, ("dhcp_discover(): dhcp state is DISCOVER\n"));
-  LWIP_DEBUGF(DHCP_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_LEVEL_WARNING, ("dhcp_select: could not allocate DHCP request\n"));
   /* create and initialize the DHCP message header */
   p_out = dhcp_create_msg(netif, dhcp, DHCP_DISCOVER, &options_out_len);
   if (p_out != NULL) {
