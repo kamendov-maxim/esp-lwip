@@ -110,6 +110,10 @@ static dns_setserver_callback_t s_dns_setserver_callback = NULL;
 #include <stdbool.h>
 #endif
 
+#ifdef LWIP_HOOK_FILENAME
+#include LWIP_HOOK_FILENAME
+#endif
+
 /** Random generator function to create random TXIDs and source ports for queries */
 #ifndef DNS_RAND_TXID
 #if ((LWIP_DNS_SECURE & LWIP_DNS_SECURE_RAND_XID) != 0)
@@ -1735,6 +1739,14 @@ dns_gethostbyname_addrtype(const char *hostname, ip_addr_t *addr, dns_found_call
     return ERR_ARG;
   }
 
+#ifdef LWIP_HOOK_DNS_EXTERNAL_RESOLVE
+  {
+    err_t err = ERR_OK;
+    if (LWIP_HOOK_DNS_EXTERNAL_RESOLVE(hostname, addr, found, callback_arg, dns_addrtype, &err)) {
+       return err;
+    }
+  }
+#endif /* LWIP_HOOK_DNS_EXTERNAL_RESOLVE */
 
 #if LWIP_HAVE_LOOPIF
   if (strcmp(hostname, "localhost") == 0) {
