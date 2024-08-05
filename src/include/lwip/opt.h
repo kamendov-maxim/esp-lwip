@@ -3098,6 +3098,34 @@
 #endif
 
 /**
+ * LWIP_HOOK_DNS_EXTERNAL_RESOLVE(name, addr, found, callback_arg, addrtype, err):
+ * Called from dns APIs (usable with callback apps) allowing an
+ * external DNS resolver (which uses sequential API) to handle the query.
+ * The external resolver is called from LwIP thread context. Please carefully use this hook
+ * to avoid thread issues(such as deadlock).
+ * Signature:\code{.c}
+ *   int my_hook(const char *name, ip_addr_t *addr, dns_found_callback found, void *callback_arg,
+ *               u8_t addrtype, err_t *err)
+ * \endcode
+ * Arguments:
+ * - name: hostname to resolve
+ * - addr: output host address
+ * - found: dns host address found callback
+ * - callback_arg: found callback argument
+ * - addrtype: type of address to query
+ * - err: output error
+ * Return values:
+ * - 0: Hook has not consumed hostname query, query continues into DNS module
+ * - != 0: Hook has consumed the query
+ *
+ * err must also be checked to determine if the hook consumed the query, but
+ * the query failed
+*/
+#ifdef __DOXYGEN__
+#define LWIP_HOOK_DNS_EXTERNAL_RESOLVE(name, addr, found, callback_arg, addrtype, err)
+#endif
+
+/**
  * LWIP_HOOK_VLAN_CHECK(netif, eth_hdr, vlan_hdr):
  * Called from ethernet_input() if VLAN support is enabled
  * Signature:\code{.c}
