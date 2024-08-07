@@ -2477,7 +2477,7 @@
 #endif
 
 /**
- * when LWIP_FORCE_ROUTER_FORWARDING is enbaled in lwip, the router flag in NA packet will always
+ * when LWIP_FORCE_ROUTER_FORWARDING is enabled in lwip, the router flag in NA packet will always
  * set to 1, otherwise, never set router flag for NA packets.
  */
 #if !defined LWIP_FORCE_ROUTER_FORWARDING || defined __DOXYGEN__
