@@ -65,6 +65,7 @@ push_master_to_github:
   only:
     - 2.1.2-esp
     - 2.1.3-esp
+    - 2.2.0-esp
   when: on_success
   variables:
     GIT_STRATEGY: clone
