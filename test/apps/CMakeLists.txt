@@ -30,7 +30,7 @@ set (LWIP_INCLUDE_DIRS
     "${LWIP_DIR}/src/include"
     "${LWIP_CONTRIB_DIR}/"
     "${CMAKE_CURRENT_SOURCE_DIR}/"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${TEST_CONFIG}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/${TEST_APP}"
 )
 
 include(${LWIP_CONTRIB_DIR}/ports/unix/Filelists.cmake)

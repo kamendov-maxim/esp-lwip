@@ -4,14 +4,14 @@ set -e
 export LWIP_DIR=`pwd`
 export LWIP_CONTRIB_DIR=`pwd`/contrib
 
-TEST_APPS="socket_no_linger socket_linger socket_linger_reuse"
+TEST_APPS="socket_no_linger socket_linger socket_linger_reuse tcp_socket_reuse"
 STRESS_TEST_APPS="socket_linger"
 
 cd test/apps
 # Prepare a failing report in case we get stuck (check in no-fork mode)
 python socket_linger_stress_test.py failed > ${LWIP_DIR}/socket_linger_stress_test.xml
 for app in $TEST_APPS; do
-    cmake -DCI_BUILD=1 -DTEST_CONFIG=${app} -B ${app} -G Ninja .
+    cmake -DCI_BUILD=1 -DTEST_APP=${app} -B ${app} -G Ninja .
     cmake --build ${app}/
     timeout 10 ./${app}/lwip_test_apps
     [ -f check2junit.py ] &&
