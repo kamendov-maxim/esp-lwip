@@ -198,6 +198,56 @@ START_TEST(test_tcp_new_max_num_remove_TIME_WAIT)
 }
 END_TEST
 
+#if ESP_LWIP
+/*
+ * ESP_LWIP:
+ * If pcb lists are full when allocating a new pcb,
+ * try to remove one pcb in TIME_WAIT,LAST_ACK, FIN_WAIT_1,CLOSING,FIN_WAIT_1 state.
+ */
+START_TEST(test_tcp_new_max_num_remove_FIN_WAIT_1)
+    {
+        struct tcp_pcb* pcb;
+        struct tcp_pcb* pcb_list[MEMP_NUM_TCP_PCB + 1];
+        err_t err;
+        int i;
+        uint16_t base_bind_port = 2222;
+        LWIP_UNUSED_ARG(_i);
+
+        /* create a pcb in FIN_WAIT_1 state */
+        pcb = tcp_new();
+        EXPECT_RET(pcb != NULL);
+        tcp_set_state(pcb, ESTABLISHED, &test_local_ip, &test_remote_ip, TEST_LOCAL_PORT, TEST_REMOTE_PORT);
+        EXPECT_RET(MEMP_STATS_GET(used, MEMP_TCP_PCB) == 1);
+        err = tcp_close(pcb);
+        EXPECT_RET(err == ERR_OK);
+        EXPECT_RET(pcb->state == FIN_WAIT_1);
+        EXPECT_RET(MEMP_STATS_GET(used, MEMP_TCP_PCB) == 1);
+
+        /* Create max number pcbs */
+        for(i = 0;i < MEMP_NUM_TCP_PCB-1; i++) {
+            pcb_list[i] = tcp_new();
+            EXPECT(MEMP_STATS_GET(used, MEMP_TCP_PCB) == (i + 2));
+            /* must bind pcb, otherwise, it will not be calculated in tcp_active_pcbs */
+            err = tcp_bind(pcb_list[i], &test_netif.ip_addr, base_bind_port+i);
+            EXPECT(err == ERR_OK);
+        }
+        EXPECT(MEMP_STATS_GET(used, MEMP_TCP_PCB) == MEMP_NUM_TCP_PCB);
+        /* Create one more pcb */
+        pcb_list[MEMP_NUM_TCP_PCB-1] = tcp_new();
+
+        /* the FIN_WAIT_1 pcb was removed */
+        EXPECT_RET(pcb_list[MEMP_NUM_TCP_PCB-1] != NULL);
+        EXPECT_RET(MEMP_STATS_GET(used, MEMP_TCP_PCB) == MEMP_NUM_TCP_PCB);
+
+        for (i = 0; i <= MEMP_NUM_TCP_PCB-1; i++)
+        {
+            tcp_abort(pcb_list[i]);
+        }
+        EXPECT(MEMP_STATS_GET(used, MEMP_TCP_PCB) == 0);
+
+    }
+END_TEST
+#endif /* ESP_LWIP */
 
 /* Call tcp_connect to check active open */
 START_TEST(test_tcp_connect_active_open)
@@ -649,6 +699,9 @@ tcp_state_suite(void)
   testfunc tests[] = {
     TESTFUNC(test_tcp_new_max_num),
     TESTFUNC(test_tcp_new_max_num_remove_TIME_WAIT),
+#if ESP_LWIP
+    TESTFUNC(test_tcp_new_max_num_remove_FIN_WAIT_1),
+#endif
     TESTFUNC(test_tcp_connect_active_open),
     TESTFUNC(test_tcp_active_close),
     TESTFUNC(test_tcp_imultaneous_close),

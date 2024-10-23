@@ -14,10 +14,11 @@ for app in $TEST_APPS; do
     cmake -DCI_BUILD=1 -DTEST_APP=${app} -B ${app} -G Ninja .
     cmake --build ${app}/
     timeout 10 ./${app}/lwip_test_apps
-    [ -f check2junit.py ] &&
+    [ -f ${LWIP_DIR}/check2junit.py ] &&
         python ${LWIP_DIR}/check2junit.py lwip_test_apps.xml > ${LWIP_DIR}/${app}.xml
 done
-# Run the lingering test multiple times
+
+# Run the stress test(s) multiple times
 for stress_cfg in $STRESS_TEST_APPS; do
   for run in {1..1000}; do ( timeout 10 ./$stress_cfg/lwip_test_apps ) || exit 1 ; done;
 done
