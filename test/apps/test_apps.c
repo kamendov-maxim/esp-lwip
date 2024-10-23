@@ -21,17 +21,6 @@ Suite* create_suite(const char* name, testfunc *tests, size_t num_tests, SFun se
   return s;
 }
 
-void lwip_check_ensure_no_alloc(unsigned int skip)
-{
-  int i;
-  unsigned int mask;
-  for (i = 0, mask = 1; i < MEMP_MAX; i++, mask <<= 1) {
-    if (!(skip & mask)) {
-      fail_unless(lwip_stats.memp[i]->used == 0);
-    }
-  }
-}
-
 int main(void)
 {
   int number_failed;
